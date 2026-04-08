@@ -45,6 +45,4 @@ public class ComplaintService {
     public Collection<Complaint> getAllComplaints() {
         return map.values();
     }
-
- 
 }

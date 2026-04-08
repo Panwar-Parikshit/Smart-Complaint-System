@@ -7,18 +7,20 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.sql.ResultSet;
 
-public class UserUI extends JFrame {
+public class UserUI extends JFrame { // Gui window for user
 
-    JTextField titleField;
-    JTextArea descArea;
-    JComboBox<String> categoryBox;
-    JComboBox<String> severityBox, urgencyBox, impactBox;
-
+    JTextField titleField; // stores input for  title
+    JTextArea descArea;// stores input for description
+    JComboBox<String> categoryBox; // // stores input for team category
+    JComboBox<String> severityBox, urgencyBox, impactBox; // // stores input for severity, urgency, impact
+ 
+    // table for displaying the complaints
     JTable table;
     DefaultTableModel tableModel;
 
     public UserUI() {
 
+    	// creates main window
         setTitle("User Panel");
         setSize(1000, 500);
         setLayout(null);
@@ -29,7 +31,7 @@ public class UserUI extends JFrame {
         t1.setBounds(20, 20, 100, 25);
         add(t1);
 
-        titleField = new JTextField();
+        titleField = new JTextField(); // input for title
         titleField.setBounds(120, 20, 200, 25);
         add(titleField);
 
@@ -38,7 +40,7 @@ public class UserUI extends JFrame {
         t2.setBounds(20, 60, 100, 25);
         add(t2);
 
-        descArea = new JTextArea();
+        descArea = new JTextArea(); // input for description
         descArea.setBounds(120, 60, 200, 80);
         add(descArea);
 
@@ -47,7 +49,8 @@ public class UserUI extends JFrame {
         t3.setBounds(20, 150, 100, 25);
         add(t3);
 
-        categoryBox = new JComboBox<>(new String[]{"IT", "Maintenance", "Service"});
+        categoryBox = new JComboBox<>(new String[]{"IT", "Maintenance", "Service"}); // dropdown to choose a 
+        																			//team
         categoryBox.setBounds(120, 150, 200, 25);
         add(categoryBox);
 
@@ -58,7 +61,7 @@ public class UserUI extends JFrame {
         s1.setBounds(20, 190, 80, 25);
         add(s1);
 
-        severityBox = new JComboBox<>(values);
+        severityBox = new JComboBox<>(values); // user select values for severity
         severityBox.setBounds(100, 190, 80, 25);
         add(severityBox);
 
@@ -66,7 +69,7 @@ public class UserUI extends JFrame {
         s2.setBounds(190, 190, 80, 25);
         add(s2);
 
-        urgencyBox = new JComboBox<>(values);
+        urgencyBox = new JComboBox<>(values);// user select values for urgency
         urgencyBox.setBounds(260, 190, 80, 25);
         add(urgencyBox);
 
@@ -74,26 +77,27 @@ public class UserUI extends JFrame {
         s3.setBounds(350, 190, 80, 25);
         add(s3);
 
-        impactBox = new JComboBox<>(values);
+        impactBox = new JComboBox<>(values);// user select values for impact
         impactBox.setBounds(410, 190, 80, 25);
         add(impactBox);
 
         // Buttons
-        JButton submitBtn = new JButton("Submit");
+        JButton submitBtn = new JButton("Submit"); // creates submit button
         submitBtn.setBounds(120, 230, 100, 30);
         add(submitBtn);
 
-        JButton viewBtn = new JButton("View Complaints");
+        JButton viewBtn = new JButton("View Complaints"); // creates complaint button
         viewBtn.setBounds(230, 230, 160, 30);
         add(viewBtn);
 
         // TABLE
         String[] cols = {"ID","Title","Category","Priority","Status","Created At","Updated At"};
-        tableModel = new DefaultTableModel(cols, 0);
-        table = new JTable(tableModel);
+        tableModel = new DefaultTableModel(cols, 0); // for storing data
+        table = new JTable(tableModel);// for displaying data
 
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
+        // setting the width of each column
         table.getColumnModel().getColumn(0).setPreferredWidth(50);
         table.getColumnModel().getColumn(1).setPreferredWidth(180);
         table.getColumnModel().getColumn(2).setPreferredWidth(120);
@@ -102,6 +106,7 @@ public class UserUI extends JFrame {
         table.getColumnModel().getColumn(5).setPreferredWidth(180);
         table.getColumnModel().getColumn(6).setPreferredWidth(180);
 
+        // makes table scrollable
         JScrollPane scroll = new JScrollPane(table);
         scroll.setBounds(500, 20, 450, 400);
         add(scroll);
@@ -134,12 +139,12 @@ public class UserUI extends JFrame {
         // VIEW
         viewBtn.addActionListener(e -> {
             try {
-                ResultSet rs = new ComplaintDAO().getComplaintsByUser();
+                ResultSet rs = new ComplaintDAO().getComplaintsByUser(); // fetches data
 
-                tableModel.setRowCount(0);
+                tableModel.setRowCount(0);// removes the old data
 
-                while (rs.next()) {
-                    tableModel.addRow(new Object[]{
+                while (rs.next()) { // loops through the result
+                    tableModel.addRow(new Object[]{ // add data to table
                             rs.getInt("id"),
                             rs.getString("title"),
                             rs.getString("category"),

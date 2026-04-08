@@ -5,7 +5,6 @@ import java.sql.*;
 
 public class ComplaintDAO {
 
-    // INSERT
     public void insertComplaint(Complaint c) {
         try {
             Connection conn = DBConnection.getConnection();
@@ -30,7 +29,6 @@ public class ComplaintDAO {
         }
     }
 
-    // USER VIEW
     public ResultSet getComplaintsByUser() {
         try {
             Connection conn = DBConnection.getConnection();
@@ -46,8 +44,8 @@ public class ComplaintDAO {
         }
         return null;
     }
+    
 
-    // TEAM VIEW
     public ResultSet getComplaintsByTeam(String category) {
         try {
             Connection conn = DBConnection.getConnection();
@@ -64,8 +62,21 @@ public class ComplaintDAO {
         }
         return null;
     }
+    public void deleteComplaint(int id) {
+        try {
+            Connection conn = DBConnection.getConnection();
 
-    // UPDATE STATUS
+            String sql = "DELETE FROM complaints WHERE id=?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            ps.setInt(1, id);
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void updateStatus(int id, String status) {
         try {
             Connection conn = DBConnection.getConnection();
@@ -84,7 +95,6 @@ public class ComplaintDAO {
         }
     }
 
-    // SEARCH
     public ResultSet searchByTitle(String title, String category) {
         try {
             Connection conn = DBConnection.getConnection();
