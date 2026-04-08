@@ -3,6 +3,9 @@ package dao;
 import model.Complaint;
 import java.sql.*;
 
+// 🔥 ADD THIS
+import util.AppContext;
+
 public class ComplaintDAO {
 
     // INSERT
@@ -24,6 +27,9 @@ public class ComplaintDAO {
             ps.setString(8, "NEW");
 
             ps.executeUpdate();
+
+            // 🔥 IMPORTANT: ADD TO SERVICE (DAA INTEGRATION)
+            AppContext.service.addComplaint(c);
 
         } catch (Exception e) {
             e.printStackTrace();

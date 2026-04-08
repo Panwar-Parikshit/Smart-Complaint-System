@@ -113,7 +113,10 @@ public class UserUI extends JFrame {
 
             c.setTitle(titleField.getText());
             c.setDescription(descArea.getText());
-            c.setCategory(categoryBox.getSelectedItem().toString());
+
+            // 🔥 AUTO CATEGORY DETECTION (DAA - STRING MATCHING)
+            String detectedCategory = detectCategory(descArea.getText());
+            c.setCategory(detectedCategory);
 
             int severity = Integer.parseInt(severityBox.getSelectedItem().toString());
             int urgency = Integer.parseInt(urgencyBox.getSelectedItem().toString());
@@ -128,7 +131,8 @@ public class UserUI extends JFrame {
 
             new ComplaintDAO().insertComplaint(c);
 
-            JOptionPane.showMessageDialog(null, "Complaint Submitted!");
+            JOptionPane.showMessageDialog(null, 
+                "Complaint Submitted!\nDetected Category: " + detectedCategory);
         });
 
         // VIEW
@@ -156,5 +160,21 @@ public class UserUI extends JFrame {
         });
 
         setVisible(true);
+    }
+
+    // 🔥 STRING MATCHING FUNCTION (DAA)
+    private String detectCategory(String desc) {
+        desc = desc.toLowerCase();
+
+        if (desc.contains("network") || desc.contains("server") || desc.contains("software"))
+            return "IT";
+
+        if (desc.contains("electric") || desc.contains("repair") || desc.contains("clean"))
+            return "Maintenance";
+
+        if (desc.contains("service") || desc.contains("support"))
+            return "Service";
+
+        return "IT"; // default
     }
 }
