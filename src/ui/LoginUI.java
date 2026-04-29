@@ -4,82 +4,81 @@ import dao.UserDAO;
 import model.User;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent; // represents an event like button clicked
-import java.awt.event.ActionListener; // used for handling events => run some code when a buttonr is pressed
+import java.awt.*;
 
-public class LoginUI extends JFrame { // for window
+public class LoginUI extends JFrame {
 
     JTextField usernameField;
     JPasswordField passwordField;
 
     public LoginUI() {
-// setting up the window -> title, sizee, layout 
+
         setTitle("Login");
-        setSize(300, 200);
+        setSize(420, 300);
         setLayout(null);
+        setLocationRelativeTo(null);
+        getContentPane().setBackground(new Color(235,240,245));
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        //username ui
-        JLabel userLabel = new JLabel("Username");
-        userLabel.setBounds(20, 20, 80, 25);
-        add(userLabel);
-        // adds input box
+        JPanel panel = new JPanel(null);
+        panel.setBounds(40, 30, 320, 210);
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createLineBorder(new Color(200,200,200)));
+        add(panel);
+
+        JLabel title = new JLabel("Login");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        title.setBounds(120, 10, 100, 30);
+        panel.add(title);
+
         usernameField = new JTextField();
-        usernameField.setBounds(100, 20, 150, 25);
-        add(usernameField);
-        
-        // password ui
-        JLabel passLabel = new JLabel("Password");
-        passLabel.setBounds(20, 60, 80, 25);
-        add(passLabel);
+        usernameField.setBounds(50, 60, 220, 30);
+        panel.add(usernameField);
 
-        //adds password box
         passwordField = new JPasswordField();
-        passwordField.setBounds(100, 60, 150, 25);
-        add(passwordField);
+        passwordField.setBounds(50, 100, 220, 30);
+        panel.add(passwordField);
 
-        // login button
-        JButton loginBtn = new JButton("Login");
-        loginBtn.setBounds(100, 100, 100, 30);
-        add(loginBtn);
+        JButton loginBtn = createButton("Login", new Color(33,150,243));
+        loginBtn.setBounds(50, 145, 220, 40);
+        panel.add(loginBtn);
 
-        // logic when login button is clicked
-        loginBtn.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+        loginBtn.addActionListener(e -> {
 
-                String username = usernameField.getText(); // gets user input
-                String password = new String(passwordField.getPassword()); // gets user input
+            User user = new UserDAO().login(
+                    usernameField.getText(),
+                    new String(passwordField.getPassword())
+            );
 
-                //calls database
-                UserDAO dao = new UserDAO();
-                User user = dao.login(username, password); // sends input to database if the input is valid
-                // it gets a user object, otherwise if invalid gets null
-
-                if (user != null) {
-
-                    JOptionPane.showMessageDialog(null, "Login Successful!");
-
-               
-                    if (user.getRole().equals("ADMIN")) {
-                        new AdminUI();
-                    } else if (user.getRole().equals("USER")) {
-                        new UserUI();
-                    } else {
-                        new TeamUI(user);
-                    }
-
-                    dispose();
-
-                } else {
-                    JOptionPane.showMessageDialog(null, "Invalid Credentials");
-                }
+            if (user != null) {
+                if (user.getRole().equals("ADMIN")) new AdminUI();
+                else if (user.getRole().equals("USER")) new UserUI();
+                else new TeamUI(user);
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(null, "Invalid Credentials");
             }
         });
 
         setVisible(true);
     }
 
+    private JButton createButton(String text, Color color) {
+        JButton btn = new JButton(text);
+        btn.setOpaque(true);
+        btn.setContentAreaFilled(true);
+        btn.setBorderPainted(false);
+        btn.setBackground(color);
+        btn.setForeground(Color.WHITE);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        return btn;
+    }
+
     public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+        } catch (Exception e) {}
+
         new LoginUI();
     }
 }

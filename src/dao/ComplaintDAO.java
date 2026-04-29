@@ -94,6 +94,23 @@ public class ComplaintDAO {
             e.printStackTrace();
         }
     }
+    public ResultSet searchById(int id, String category) {
+        try {
+            Connection conn = DBConnection.getConnection();
+
+            String sql = "SELECT id, title, category, priority, status, created_at, updated_at FROM complaints WHERE id=? AND category=?";
+
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, id);
+            ps.setString(2, category);
+
+            return ps.executeQuery();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     public ResultSet searchByTitle(String title, String category) {
         try {

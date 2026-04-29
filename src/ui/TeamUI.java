@@ -1,80 +1,89 @@
 package ui;
 
-import javax.swing.*; // used for UI
-import javax.swing.table.DefaultTableModel;// for table handling
-import java.awt.*; // for layout
-import java.sql.ResultSet;// for database result
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.sql.ResultSet;
 
-import dao.ComplaintDAO; // for database operations
-import model.User; // for logged in user info
+import dao.ComplaintDAO;
+import model.User;
 
 public class TeamUI {
 
-    JTable table; // used for displaying contents
-    DefaultTableModel model; // used to store table data
-    JTextField searchField; // input for search
-    JComboBox<String> statusBox; // dropdown menu to update status
+    JTable table;
+    DefaultTableModel model;
+    JTextField searchField;
+    JComboBox<String> statusBox;
+    JComboBox<String> searchType;
 
-    public TeamUI(User user) { // the constructor takes logged in user to know which which team has logged in
+    public TeamUI(User user) {
 
-    	// creates a window with title
         JFrame frame = new JFrame("Team Panel - " + user.getRole());
-        frame.setSize(950, 500);
-        frame.setLayout(new BorderLayout());
+        frame.setSize(1200, 600);
+        frame.setLayout(null);
+        frame.setLocationRelativeTo(null);
+        frame.getContentPane().setBackground(new Color(235,240,245));
 
-        // TABLE
+        JLabel header = new JLabel("Team Dashboard");
+        header.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        header.setBounds(20, 10, 300, 30);
+        frame.add(header);
+
+        // 🔥 FIX: Map role → category
+        String category = mapRoleToCategory(user.getRole());
+
+        JPanel left = new JPanel(null);
+        left.setBounds(20, 60, 320, 460);
+        left.setBackground(Color.WHITE);
+        left.setBorder(BorderFactory.createLineBorder(new Color(200,200,200)));
+        frame.add(left);
+
+        statusBox = new JComboBox<>(new String[]{"IN_PROGRESS", "RESOLVED", "ESCALATED"});
+        statusBox.setBounds(30, 40, 260, 35);
+        left.add(statusBox);
+
+        JButton updateBtn = createButton("Update Status", new Color(46,204,113));
+        updateBtn.setBounds(30, 90, 260, 45);
+        left.add(updateBtn);
+
+        searchType = new JComboBox<>(new String[]{"ID", "Title"});
+        searchType.setBounds(30, 160, 120, 35);
+        left.add(searchType);
+
+        searchField = new JTextField();
+        searchField.setBounds(160, 160, 130, 35);
+        left.add(searchField);
+
+        JButton searchBtn = createButton("Search", new Color(33,150,243));
+        searchBtn.setBounds(30, 210, 260, 45);
+        left.add(searchBtn);
+
+        JPanel tablePanel = new JPanel(new BorderLayout());
+        tablePanel.setBounds(360, 60, 800, 460);
+        tablePanel.setBackground(Color.WHITE);
+        frame.add(tablePanel);
+
         String[] cols = {"ID","Title","Category","Priority","Status","Created At","Updated At"};
-        model = new DefaultTableModel(cols, 0); // stores data
-        table = new JTable(model); // displays data
+        model = new DefaultTableModel(cols, 0);
+        table = new JTable(model);
 
-        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); // prevents column from shrinking
+        table.setRowHeight(30);
+        table.getTableHeader().setBackground(new Color(33,150,243));
+        table.getTableHeader().setForeground(Color.WHITE);
 
-        table.getColumnModel().getColumn(0).setPreferredWidth(50);
-        table.getColumnModel().getColumn(1).setPreferredWidth(180);
-        table.getColumnModel().getColumn(2).setPreferredWidth(120);
-        table.getColumnModel().getColumn(3).setPreferredWidth(100);
-        table.getColumnModel().getColumn(4).setPreferredWidth(120);
-        table.getColumnModel().getColumn(5).setPreferredWidth(180);
-        table.getColumnModel().getColumn(6).setPreferredWidth(180);
-
-        // adds scrollable table
-        JScrollPane scroll = new JScrollPane(table);
-        frame.add(scroll, BorderLayout.CENTER);
-
-       
-        JPanel panel = new JPanel(); // used for holding buttons and input
-
-        
-        // selecting new status
-        String[] statuses = {"IN_PROGRESS", "RESOLVED", "ESCALATED"};
-        statusBox = new JComboBox<>(statuses);
-        panel.add(statusBox);
-
-        //button for updating status
-        JButton updateBtn = new JButton("Update Status");
-        panel.add(updateBtn);
-
-        // input for searching
-        searchField = new JTextField(15);
-        panel.add(searchField);
-
-        // button for searching
-        JButton searchBtn = new JButton("Search by Title");
-        panel.add(searchBtn);
-
-        frame.add(panel, BorderLayout.SOUTH); // adds pannels to the bottom
+        tablePanel.add(new JScrollPane(table));
 
         ComplaintDAO dao = new ComplaintDAO();
 
-        // LOAD FUNCTION
-        Runnable loadData = () -> { // function to load complaints
+       
+        Runnable load = () -> {
             try {
                 model.setRowCount(0);
 
-                ResultSet rs = dao.getComplaintsByTeam(user.getRole()); // fetch complaint of that team
+                ResultSet rs = dao.getComplaintsByTeam(category);
 
-                while (rs.next()) { // loops through database rows 
-                    model.addRow(new Object[]{ // add each row to the table
+                while (rs.next()) {
+                    model.addRow(new Object[]{
                             rs.getInt("id"),
                             rs.getString("title"),
                             rs.getString("category"),
@@ -90,37 +99,32 @@ public class TeamUI {
             }
         };
 
-        loadData.run();
+        load.run();
 
         // UPDATE STATUS
-        updateBtn.addActionListener(e -> { //logic for updating status -> runs when update button is clicked
-
+        updateBtn.addActionListener(e -> {
             int row = table.getSelectedRow();
-
-            if (row == -1) {
-                JOptionPane.showMessageDialog(frame, "Select a complaint first!");
-                return;
-            }
+            if (row == -1) return;
 
             int id = (int) model.getValueAt(row, 0);
-            String status = statusBox.getSelectedItem().toString();
+            dao.updateStatus(id, statusBox.getSelectedItem().toString());
 
-            dao.updateStatus(id, status);
-
-            JOptionPane.showMessageDialog(frame, "Status Updated!");
-
-            loadData.run();
+            load.run();
         });
 
-        // SEARCH
-        searchBtn.addActionListener(e -> { // logic for searching -> runs when search button is clicked
+        // SEARCH FIXED
+        searchBtn.addActionListener(e -> {
             try {
                 model.setRowCount(0);
 
-                
-                String title = searchField.getText();
+                ResultSet rs;
 
-                ResultSet rs = dao.searchByTitle(title, user.getRole());
+                if (searchType.getSelectedItem().equals("ID")) {
+                    int id = Integer.parseInt(searchField.getText());
+                    rs = dao.searchById(id, category);
+                } else {
+                    rs = dao.searchByTitle(searchField.getText(), category);
+                }
 
                 while (rs.next()) {
                     model.addRow(new Object[]{
@@ -135,10 +139,41 @@ public class TeamUI {
                 }
 
             } catch (Exception ex) {
-                ex.printStackTrace();
+                JOptionPane.showMessageDialog(frame, "Invalid input!");
             }
         });
 
         frame.setVisible(true);
+    }
+
+  
+    private String mapRoleToCategory(String role) {
+
+        if (role.equalsIgnoreCase("IT") || role.contains("IT"))
+            return "IT";
+
+        if (role.equalsIgnoreCase("Maintenance") || role.contains("Maintenance"))
+            return "Maintenance";
+
+        if (role.equalsIgnoreCase("Service") || role.contains("Service"))
+            return "Service";
+
+        return role; 
+    }
+
+    private JButton createButton(String text, Color color) {
+        JButton btn = new JButton(text);
+
+        btn.setOpaque(true);
+        btn.setContentAreaFilled(true);
+        btn.setBorderPainted(false);
+
+        btn.setBackground(color);
+        btn.setForeground(Color.WHITE);
+
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btn.setFocusPainted(false);
+
+        return btn;
     }
 }

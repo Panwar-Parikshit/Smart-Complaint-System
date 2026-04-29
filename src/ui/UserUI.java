@@ -5,113 +5,130 @@ import model.Complaint;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.sql.ResultSet;
 
-public class UserUI extends JFrame { // Gui window for user
+public class UserUI extends JFrame {
+	
 
-    JTextField titleField; // stores input for  title
-    JTextArea descArea;// stores input for description
-    JComboBox<String> categoryBox; // // stores input for team category
-    JComboBox<String> severityBox, urgencyBox, impactBox; // // stores input for severity, urgency, impact
- 
-    // table for displaying the complaints
+    JTextField titleField;
+    JTextArea descArea;
+    JComboBox<String> categoryBox;
+    JComboBox<String> severityBox, urgencyBox, impactBox;
+
     JTable table;
     DefaultTableModel tableModel;
 
     public UserUI() {
 
-    	// creates main window
         setTitle("User Panel");
-        setSize(1000, 500);
+        setSize(1200, 600);
         setLayout(null);
+        setLocationRelativeTo(null);
+        getContentPane().setBackground(new Color(235,240,245));
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        // Title
-        JLabel t1 = new JLabel("Title");
-        t1.setBounds(20, 20, 100, 25);
-        add(t1);
+        // HEADER
+        JLabel header = new JLabel("User Dashboard");
+        header.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        header.setBounds(20, 10, 300, 30);
+        add(header);
 
-        titleField = new JTextField(); // input for title
-        titleField.setBounds(120, 20, 200, 25);
-        add(titleField);
+        // LEFT PANEL
+        JPanel left = new JPanel(null);
+        left.setBounds(20, 60, 350, 460);
+        left.setBackground(Color.WHITE);
+        left.setBorder(BorderFactory.createLineBorder(new Color(200,200,200)));
+        add(left);
 
-        // Description
-        JLabel t2 = new JLabel("Description");
-        t2.setBounds(20, 60, 100, 25);
-        add(t2);
+        JLabel l1 = new JLabel("Title");
+        l1.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        l1.setBounds(20, 10, 100, 25);
+        left.add(l1);
 
-        descArea = new JTextArea(); // input for description
-        descArea.setBounds(120, 60, 200, 80);
-        add(descArea);
+        titleField = new JTextField();
+        titleField.setBounds(20, 35, 300, 30);
+        left.add(titleField);
 
-        // Category
-        JLabel t3 = new JLabel("Category");
-        t3.setBounds(20, 150, 100, 25);
-        add(t3);
+        JLabel l2 = new JLabel("Description");
+        l2.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        l2.setBounds(20, 75, 100, 25);
+        left.add(l2);
 
-        categoryBox = new JComboBox<>(new String[]{"IT", "Maintenance", "Service"}); // dropdown to choose a 
-        																			//team
-        categoryBox.setBounds(120, 150, 200, 25);
-        add(categoryBox);
+        descArea = new JTextArea();
+        descArea.setBounds(20, 100, 300, 80);
+        descArea.setBorder(BorderFactory.createLineBorder(new Color(180,180,180)));
+        left.add(descArea);
 
-        // Dropdown values
+        JLabel l3 = new JLabel("Category");
+        l3.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        l3.setBounds(20, 190, 100, 25);
+        left.add(l3);
+
+        categoryBox = new JComboBox<>(new String[]{"IT", "Maintenance", "Service"});
+        categoryBox.setBounds(20, 215, 300, 30);
+        left.add(categoryBox);
+
         String[] values = {"1","2","3","4","5","6","7","8","9","10"};
 
-        JLabel s1 = new JLabel("Severity");
-        s1.setBounds(20, 190, 80, 25);
-        add(s1);
+        JLabel l4 = new JLabel("Severity");
+        l4.setBounds(20, 255, 80, 25);
+        left.add(l4);
 
-        severityBox = new JComboBox<>(values); // user select values for severity
-        severityBox.setBounds(100, 190, 80, 25);
-        add(severityBox);
+        severityBox = new JComboBox<>(values);
+        severityBox.setBounds(20, 280, 80, 30);
+        left.add(severityBox);
 
-        JLabel s2 = new JLabel("Urgency");
-        s2.setBounds(190, 190, 80, 25);
-        add(s2);
+        JLabel l5 = new JLabel("Urgency");
+        l5.setBounds(120, 255, 80, 25);
+        left.add(l5);
 
-        urgencyBox = new JComboBox<>(values);// user select values for urgency
-        urgencyBox.setBounds(260, 190, 80, 25);
-        add(urgencyBox);
+        urgencyBox = new JComboBox<>(values);
+        urgencyBox.setBounds(120, 280, 80, 30);
+        left.add(urgencyBox);
 
-        JLabel s3 = new JLabel("Impact");
-        s3.setBounds(350, 190, 80, 25);
-        add(s3);
+        JLabel l6 = new JLabel("Impact");
+        l6.setBounds(220, 255, 80, 25);
+        left.add(l6);
 
-        impactBox = new JComboBox<>(values);// user select values for impact
-        impactBox.setBounds(410, 190, 80, 25);
-        add(impactBox);
+        impactBox = new JComboBox<>(values);
+        impactBox.setBounds(220, 280, 80, 30);
+        left.add(impactBox);
 
-        // Buttons
-        JButton submitBtn = new JButton("Submit"); // creates submit button
-        submitBtn.setBounds(120, 230, 100, 30);
-        add(submitBtn);
+        // BUTTONS (FIXED)
+        JButton submitBtn = createButton("Submit Complaint", new Color(46,204,113));
+        submitBtn.setBounds(20, 340, 150, 45);
+        left.add(submitBtn);
 
-        JButton viewBtn = new JButton("View Complaints"); // creates complaint button
-        viewBtn.setBounds(230, 230, 160, 30);
-        add(viewBtn);
+        JButton viewBtn = createButton("View Complaints", new Color(33,150,243));
+        viewBtn.setBounds(180, 340, 150, 45);
+        left.add(viewBtn);
 
-        // TABLE
+        // RIGHT PANEL
+        JPanel tablePanel = new JPanel(new BorderLayout());
+        tablePanel.setBounds(400, 60, 760, 460);
+        tablePanel.setBackground(Color.WHITE);
+        tablePanel.setBorder(BorderFactory.createLineBorder(new Color(200,200,200)));
+        add(tablePanel);
+
         String[] cols = {"ID","Title","Category","Priority","Status","Created At","Updated At"};
-        tableModel = new DefaultTableModel(cols, 0); // for storing data
-        table = new JTable(tableModel);// for displaying data
+        tableModel = new DefaultTableModel(cols, 0);
+        table = new JTable(tableModel);
 
-        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        table.setRowHeight(30);
+        table.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        table.getTableHeader().setBackground(new Color(33,150,243));
+        table.getTableHeader().setForeground(Color.WHITE);
+        table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
 
-        // setting the width of each column
-        table.getColumnModel().getColumn(0).setPreferredWidth(50);
-        table.getColumnModel().getColumn(1).setPreferredWidth(180);
-        table.getColumnModel().getColumn(2).setPreferredWidth(120);
-        table.getColumnModel().getColumn(3).setPreferredWidth(80);
-        table.getColumnModel().getColumn(4).setPreferredWidth(100);
-        table.getColumnModel().getColumn(5).setPreferredWidth(180);
-        table.getColumnModel().getColumn(6).setPreferredWidth(180);
+        int[] widths = {50,150,100,80,100,140,140};
+        for (int i = 0; i < widths.length; i++) {
+            table.getColumnModel().getColumn(i).setPreferredWidth(widths[i]);
+        }
 
-        // makes table scrollable
-        JScrollPane scroll = new JScrollPane(table);
-        scroll.setBounds(500, 20, 450, 400);
-        add(scroll);
+        tablePanel.add(new JScrollPane(table));
 
-        // SUBMIT
+        // LOGIC
         submitBtn.addActionListener(e -> {
 
             Complaint c = new Complaint();
@@ -136,15 +153,13 @@ public class UserUI extends JFrame { // Gui window for user
             JOptionPane.showMessageDialog(null, "Complaint Submitted!");
         });
 
-        // VIEW
         viewBtn.addActionListener(e -> {
             try {
-                ResultSet rs = new ComplaintDAO().getComplaintsByUser(); // fetches data
+                ResultSet rs = new ComplaintDAO().getComplaintsByUser();
+                tableModel.setRowCount(0);
 
-                tableModel.setRowCount(0);// removes the old data
-
-                while (rs.next()) { // loops through the result
-                    tableModel.addRow(new Object[]{ // add data to table
+                while (rs.next()) {
+                    tableModel.addRow(new Object[]{
                             rs.getInt("id"),
                             rs.getString("title"),
                             rs.getString("category"),
@@ -154,12 +169,27 @@ public class UserUI extends JFrame { // Gui window for user
                             rs.getTimestamp("updated_at")
                     });
                 }
-
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
         });
 
         setVisible(true);
+    }
+
+    private JButton createButton(String text, Color color) {
+        JButton btn = new JButton(text);
+
+        btn.setOpaque(true);
+        btn.setContentAreaFilled(true);
+        btn.setBorderPainted(false);
+
+        btn.setBackground(color);
+        btn.setForeground(Color.WHITE);
+
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btn.setFocusPainted(false);
+
+        return btn;
     }
 }

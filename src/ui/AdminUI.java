@@ -2,6 +2,7 @@ package ui;
 
 import dao.ComplaintDAO;
 import dao.DBConnection;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -15,49 +16,53 @@ public class AdminUI {
     public AdminUI() {
 
         JFrame frame = new JFrame("Admin Panel");
-        frame.setSize(1000, 500);
-        frame.setLayout(new BorderLayout());
+        frame.setSize(1200, 600);
+        frame.setLayout(null);
+        frame.setLocationRelativeTo(null);
+        frame.getContentPane().setBackground(new Color(235,240,245));
 
-        // TABLE
+        JLabel header = new JLabel("Admin Dashboard");
+        header.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        header.setBounds(20, 10, 300, 30);
+        frame.add(header);
+
+        JPanel left = new JPanel(null);
+        left.setBounds(20, 60, 320, 460);
+        left.setBackground(Color.WHITE);
+        left.setBorder(BorderFactory.createLineBorder(new Color(200,200,200)));
+        frame.add(left);
+
+        JButton loadBtn = createButton("Load Complaints", new Color(33,150,243));
+        loadBtn.setBounds(30, 40, 260, 45);
+        left.add(loadBtn);
+
+        JButton deleteBtn = createButton("Delete Complaint", new Color(231,76,60));
+        deleteBtn.setBounds(30, 100, 260, 45);
+        left.add(deleteBtn);
+
+        JPanel tablePanel = new JPanel(new BorderLayout());
+        tablePanel.setBounds(360, 60, 800, 460);
+        tablePanel.setBackground(Color.WHITE);
+        tablePanel.setBorder(BorderFactory.createLineBorder(new Color(200,200,200)));
+        frame.add(tablePanel);
+
         String[] cols = {"ID","Title","Category","Priority","Status","Created At","Updated At"};
         model = new DefaultTableModel(cols, 0);
         table = new JTable(model);
 
-        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        table.setRowHeight(30);
+        table.getTableHeader().setBackground(new Color(33,150,243));
+        table.getTableHeader().setForeground(Color.WHITE);
 
-        table.getColumnModel().getColumn(0).setPreferredWidth(50);
-        table.getColumnModel().getColumn(1).setPreferredWidth(180);
-        table.getColumnModel().getColumn(2).setPreferredWidth(120);
-        table.getColumnModel().getColumn(3).setPreferredWidth(100);
-        table.getColumnModel().getColumn(4).setPreferredWidth(120);
-        table.getColumnModel().getColumn(5).setPreferredWidth(180);
-        table.getColumnModel().getColumn(6).setPreferredWidth(180);
-
-        JScrollPane scroll = new JScrollPane(table);
-        frame.add(scroll, BorderLayout.CENTER);
-
-        // PANEL (Buttons)
-        JPanel panel = new JPanel();
-
-        JButton loadBtn = new JButton("Load Complaints");
-        panel.add(loadBtn);
-
-        JButton deleteBtn = new JButton("Delete Complaint");
-        panel.add(deleteBtn);
-
-        frame.add(panel, BorderLayout.SOUTH);
+        tablePanel.add(new JScrollPane(table));
 
         ComplaintDAO dao = new ComplaintDAO();
 
-        // LOAD ALL COMPLAINTS
         loadBtn.addActionListener(e -> {
             try {
                 model.setRowCount(0);
-
-                // grouped by category (team)
-                String sql = "SELECT * FROM complaints ORDER BY category, priority DESC";
                 ResultSet rs = DBConnection.getConnection()
-                        .prepareStatement(sql)
+                        .prepareStatement("SELECT * FROM complaints")
                         .executeQuery();
 
                 while (rs.next()) {
@@ -71,40 +76,30 @@ public class AdminUI {
                             rs.getTimestamp("updated_at")
                     });
                 }
-
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
         });
 
-        // DELETE COMPLAINT
         deleteBtn.addActionListener(e -> {
-
             int row = table.getSelectedRow();
-
-            if (row == -1) {
-                JOptionPane.showMessageDialog(frame, "Select a complaint first!");
-                return;
-            }
-
+            if (row == -1) return;
             int id = (int) model.getValueAt(row, 0);
-
-            int confirm = JOptionPane.showConfirmDialog(
-                    frame,
-                    "Are you sure you want to delete this complaint?",
-                    "Confirm Delete",
-                    JOptionPane.YES_NO_OPTION
-            );
-
-            if (confirm == JOptionPane.YES_OPTION) {
-                dao.deleteComplaint(id);
-
-                JOptionPane.showMessageDialog(frame, "Complaint Deleted!");
-
-                model.removeRow(row); // remove from UI
-            }
+            dao.deleteComplaint(id);
+            model.removeRow(row);
         });
 
         frame.setVisible(true);
+    }
+
+    private JButton createButton(String text, Color color) {
+        JButton btn = new JButton(text);
+        btn.setOpaque(true);
+        btn.setContentAreaFilled(true);
+        btn.setBorderPainted(false);
+        btn.setBackground(color);
+        btn.setForeground(Color.WHITE);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        return btn;
     }
 }
